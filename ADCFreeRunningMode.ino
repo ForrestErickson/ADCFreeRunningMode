@@ -21,13 +21,26 @@
   Sampling frequency: 76.92 KHz
 */
 
+/*
+   FLE modify to read ADCL too.
+   Date: 20211115 Remove magic numbers from code
+   Read ADCL the lower bits.
+   Read ADCH and ADCL into byte array.
+*/
 
-int numSamples = 0;
+const long BAUD_RATE = 1000000; //Change to 1Mbit for speed.
+
+//const int NUMBER_SAMPLES = 1000;
+const int NUMBER_SAMPLES = 512;
+//const int NUMBER_SAMPLES = 255;
+volatile byte channel_1[NUMBER_SAMPLES][2] ;    // Hold the MSB and LSB of Channel 1 ADC conversion
+
+volatile int numSamples = 0;
 long t, t0;
 
 void setup()
 {
-  Serial.begin(1000000);  //Change to 1Mbit for speed.
+  Serial.begin(BAUD_RATE);
 
   ADCSRA = 0;             // clear ADCSRA register
   ADCSRB = 0;             // clear ADCSRB register
@@ -45,27 +58,61 @@ void setup()
   ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
   ADCSRA |= (1 << ADEN);  // enable ADC
   ADCSRA |= (1 << ADSC);  // start ADC measurements
+
 }//end setup()
 
 ISR(ADC_vect)
 {
-  byte x = ADCH;  // read 8 bit value from ADC
+  //  channel_1[numSamples][1] = ADCL;  // read 8 LS value from ADC
+  channel_1[numSamples][0] = ADCH;  // read 8 MSbit value from ADC
   numSamples++;
 }
 
 void loop()
 {
-  if (numSamples >= 1000)
+  if (numSamples >= NUMBER_SAMPLES)
   {
-    t = micros() - t0; // calculate elapsed time
-
-    Serial.print("Sampling frequency: ");
-    Serial.print((float)1000000 / t);
-    Serial.println(" KHz");
-    delay(2000);
-
-    // restart
-    t0 = micros();
+    //Stop ADC interups
+    ADCSRA &= ~(1 << ADIE);  // Disable interrupts when measurement complete
+    //noInterrupts();
     numSamples = 0;
-  }
+    //Clear to disable ADC interupt on finish
+    // ADCSRA &= ~(1 << ADIE);
+
+    t = micros() - t0; // calculate elapsed time
+    Serial.println("Sample#: valueMSB ");
+    for (int ii = 1; ii < NUMBER_SAMPLES; ii++) {
+      Serial.print(ii);
+      Serial.print(":, ");
+      Serial.print(channel_1[ii][0]);
+      //      Serial.print(", ");
+      //      Serial.print(channel_1[ii][1]);
+      Serial.println("");
+    }
+    Serial.println("Clean up.");
+    //  //Report setup and rate.
+    //    Serial.print("Sampl Record Length (uS): ");
+    //    Serial.println(t);
+    //    Serial.print("Sampling frequency: ");
+    //    Serial.print((float)1000*NUMBER_SAMPLES / t);
+    //    //    Serial.print((float)1000000 / t);
+    //    Serial.println(" KHz");
+
+
+
+//        interrupts();
+    t0 = micros();
+
+    //    ADCSRA |= (1 << ADPS2);                     // 16 prescaler for 76.9 KHz
+    //    ADCSRA |= (1 << ADATE); // enable auto trigger
+    //    ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
+    //    ADCSRA |= (1 << ADEN);  // enable ADC
+    //    ADCSRA |= (1 << ADSC);  // start ADC measurements
+    delay(2000); // so we can read the results.
+    //    numSamples = 0;
+    // restart
+    Serial.println("Restart.");
+    ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
+  
+  }// end if (numSamples >= NUMBER_SAMPLES)
 }// end loop()
