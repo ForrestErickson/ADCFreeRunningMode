@@ -13,8 +13,6 @@
   Sampling frequency: 76.90 KHz
   Sampling frequency: 76.90 KHz
   Sampling frequency: 76.95 KHz
-  Sampling frequency: 100.16 KHz
-  Sampling frequency: 100.20 KHz
   Sampling frequency: 76.95 KHz
   Sampling frequency: 76.95 KHz
   Sampling frequency: 76.95 KHz
@@ -22,12 +20,14 @@
 */
 
 /*
-   FLE modify to read ADCL too.
-   Date: 20211115 Remove magic numbers from code
-   Read ADCL the lower bits.
-   Read ADCH and ADCL into byte array.
-   Stop/Start ADC Interupt in main loop to read array
-   Combine ADCH and ADCL to get 10 bit result at 76.88 KSPS.
+  Modified by Forrest Lee Erickson
+  Date: 20211115 Remove magic numbers from code
+  Read ADCL the lower bits.
+  Read ADCH and ADCL into byte array.
+  Stop/Start ADC Interrupt in main loop to read array
+  Combine ADCH and ADCL to get 10 bit result at 76.88 KSPS.
+  License: Dedicated to the public domain.
+  Warranty: This code is designed to kill you but not guaranteed to do so.
 */
 
 const long BAUD_RATE = 1000000; //Change to 1Mbit for speed.
@@ -72,17 +72,17 @@ void loop()
 {
   if (numSamples >= NUMBER_SAMPLES)
   {
-    //Stop ADC interups
+    //Stop ADC interrupts
     ADCSRA &= ~(1 << ADIE);  // Disable interrupts when measurement complete
     t = micros() - t0; // calculate elapsed time
     numSamples = 0;
-    
-//    Serial.println("Sample#: value ");
-    for (int i = 1; i < NUMBER_SAMPLES; i++) {      
-//      Serial.print(i);                  //Print index
-//      Serial.print(":, ");     
+
+    //    Serial.println("Sample#: value ");
+    for (int i = 1; i < NUMBER_SAMPLES; i++) {
+      //      Serial.print(i);                  //Print index
+      //      Serial.print(":, ");
       //10 bit result = (ADCH << 8) |ADCL; // And then right shift to leave only 10 bits.
-      Serial.print((uint16_t(channel_1[i][0]<<8 | channel_1[i][1])>>6)); //Plot data.
+      Serial.print((uint16_t(channel_1[i][0] << 8 | channel_1[i][1]) >> 6)); //Plot data.
       Serial.println(", 1023, 0, 511");     //Red, Green Yellow, for MAX MIN and MID grid lines.
     }
     //Report setup and rate for plot, sort of, legend.
@@ -94,10 +94,9 @@ void loop()
     Serial.print(" ");
     Serial.print("SamplingFrequency=");
     Serial.print((float)1000 * NUMBER_SAMPLES / t);
-    //    Serial.print((float)1000000 / t);
     Serial.println("KSPS");
-
     delay(2000); // so we can read the results.
+
     t0 = micros();  //Reset the t0 before another burst of conversions.
     ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
   }// end if (numSamples >= NUMBER_SAMPLES)
