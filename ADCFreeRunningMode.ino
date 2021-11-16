@@ -27,6 +27,7 @@
    Read ADCL the lower bits.
    Read ADCH and ADCL into byte array.
    Stop/Start ADC Interupt in main loop to read array
+   Combine ADCH and ADCL to get 10 bit result at 76.88 KSPS.
 */
 
 const long BAUD_RATE = 1000000; //Change to 1Mbit for speed.
@@ -64,7 +65,7 @@ void setup()
 
 ISR(ADC_vect)
 {
-  //  channel_1[numSamples][1] = ADCL;  // read 8 LS value from ADC
+  channel_1[numSamples][1] = ADCL;  // read 8 LS value from ADC
   channel_1[numSamples][0] = ADCH;  // read 8 MSbit value from ADC
   numSamples++;
 }
@@ -81,10 +82,15 @@ void loop()
     for (int i = 1; i < NUMBER_SAMPLES; i++) {
       Serial.print(i);
       Serial.print(":, ");
-      Serial.print(channel_1[i][0]);
-      //      Serial.print(", ");
-      //      Serial.print(channel_1[i][1]);
+      //result = (ADCH << 8) |ADCL; // And then right shift to leave only 10 bits.
+      Serial.print((uint16_t(channel_1[i][0]<<8 | channel_1[i][1])>>6));
+
+//      Serial.print(channel_1[i][0]);
+//      Serial.print(", ");
+//      Serial.print(channel_1[i][1]);
       Serial.println("");
+
+      
     }
     //Report setup and rate.
     Serial.print("Sample interval (uS)= ");
