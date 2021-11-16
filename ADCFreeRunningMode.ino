@@ -78,7 +78,7 @@ void loop()
     ADCSRA &= ~(1 << ADIE);  // Disable interrupts when measurement complete
     t = micros() - t0; // calculate elapsed time
     numSamples = 0;
-    Serial.println("Sample#: valueMSB ");
+//    Serial.println("Sample#: valueMSB ");
     for (int i = 1; i < NUMBER_SAMPLES; i++) {
       Serial.print(i);
       Serial.print(":, ");
@@ -93,10 +93,10 @@ void loop()
       
     }
     //Report setup and rate.
-    Serial.print("Sample interval (uS)= ");
+    Serial.print("Sample_Interval=");
     Serial.print(t);
     Serial.println("uS");
-    Serial.print("Sampling frequency= ");
+    Serial.print("Sampling_frequency=");
     Serial.print((float)1000 * NUMBER_SAMPLES / t);
     //    Serial.print((float)1000000 / t);
     Serial.println("KSPS");
