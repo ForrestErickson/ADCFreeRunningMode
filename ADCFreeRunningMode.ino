@@ -32,9 +32,7 @@
 
 const long BAUD_RATE = 1000000; //Change to 1Mbit for speed.
 
-//const int NUMBER_SAMPLES = 1000;
-const int NUMBER_SAMPLES = 512;
-//const int NUMBER_SAMPLES = 255;
+const int NUMBER_SAMPLES = 512;                 // Largest power of 2 we can allocate in the byte array next.
 volatile byte channel_1[NUMBER_SAMPLES][2] ;    // Hold the MSB and LSB of Channel 1 ADC conversion
 
 volatile int numSamples = 0;
@@ -42,7 +40,7 @@ long t, t0;                 //For measuring the time to aquire NUMBER_SAMPLES
 
 void setup()
 {
-  Serial.begin(BAUD_RATE);
+  Serial.begin(BAUD_RATE); //For Serial monitor / Serial Ploter
 
   ADCSRA = 0;             // clear ADCSRA register
   ADCSRB = 0;             // clear ADCSRB register
@@ -78,25 +76,23 @@ void loop()
     ADCSRA &= ~(1 << ADIE);  // Disable interrupts when measurement complete
     t = micros() - t0; // calculate elapsed time
     numSamples = 0;
-//    Serial.println("Sample#: valueMSB ");
-    for (int i = 1; i < NUMBER_SAMPLES; i++) {
-      Serial.print(i);
-      Serial.print(":, ");
-      //result = (ADCH << 8) |ADCL; // And then right shift to leave only 10 bits.
-      Serial.print((uint16_t(channel_1[i][0]<<8 | channel_1[i][1])>>6));
-
-//      Serial.print(channel_1[i][0]);
-//      Serial.print(", ");
-//      Serial.print(channel_1[i][1]);
-      Serial.println("");
-
-      
+    
+//    Serial.println("Sample#: value ");
+    for (int i = 1; i < NUMBER_SAMPLES; i++) {      
+//      Serial.print(i);                  //Print index
+//      Serial.print(":, ");     
+      //10 bit result = (ADCH << 8) |ADCL; // And then right shift to leave only 10 bits.
+      Serial.print((uint16_t(channel_1[i][0]<<8 | channel_1[i][1])>>6)); //Plot data.
+      Serial.println(", 1023, 0, 511");     //Red, Green Yellow, for MAX MIN and MID grid lines.
     }
-    //Report setup and rate.
-    Serial.print("Sample Interval=");
+    //Report setup and rate for plot, sort of, legend.
+    Serial.print("SampleInterval=");
     Serial.print(t);
-    Serial.println("uS");
-    Serial.print("Sampling_frequency=");
+    Serial.print("uS. ");
+    Serial.print("SampleNumber=");
+    Serial.print(NUMBER_SAMPLES);
+    Serial.print(" ");
+    Serial.print("SamplingFrequency=");
     Serial.print((float)1000 * NUMBER_SAMPLES / t);
     //    Serial.print((float)1000000 / t);
     Serial.println("KSPS");
