@@ -93,7 +93,7 @@ void loop()
       
     }
     //Report setup and rate.
-    Serial.print("Sample_Interval=");
+    Serial.print("Sample Interval=");
     Serial.print(t);
     Serial.println("uS");
     Serial.print("Sampling_frequency=");
