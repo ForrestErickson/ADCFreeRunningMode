@@ -45,8 +45,7 @@ void setup()
   Serial.begin(BAUD_RATE); //For Serial monitor / Serial Ploter
 
   //Wink on the LED_BUILTIN
-  pinMode(LED_BUILTIN, OUTPUT);      // set the LED pin mode
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level) Start of setup()
+  void setupWinkStart(void);
 
 
   ADCSRA = 0;             // clear ADCSRA register
@@ -66,7 +65,8 @@ void setup()
   ADCSRA |= (1 << ADEN);  // enable ADC
   ADCSRA |= (1 << ADSC);  // start ADC measurements
 
-  digitalWrite(LED_BUILTIN, LOW);   // end of setup()
+  //Wink off the LED_BUILTIN
+  void setupWinkEnd(void);
 }//end setup()
 
 ISR(ADC_vect)
