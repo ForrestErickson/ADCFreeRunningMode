@@ -30,6 +30,8 @@
   Warranty: This code is designed to kill you but not guaranteed to do so.
 */
 
+#include "wink.h"
+
 const long BAUD_RATE = 1000000; //Change to 1Mbit for speed.
 
 const int NUMBER_SAMPLES = 512;                 // Largest power of 2 we can allocate in the byte array next.
@@ -41,6 +43,11 @@ long t, t0;                 //For measuring the time to aquire NUMBER_SAMPLES
 void setup()
 {
   Serial.begin(BAUD_RATE); //For Serial monitor / Serial Ploter
+
+  //Wink on the LED_BUILTIN
+  pinMode(LED_BUILTIN, OUTPUT);      // set the LED pin mode
+  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level) Start of setup()
+
 
   ADCSRA = 0;             // clear ADCSRA register
   ADCSRB = 0;             // clear ADCSRB register
@@ -59,6 +66,7 @@ void setup()
   ADCSRA |= (1 << ADEN);  // enable ADC
   ADCSRA |= (1 << ADSC);  // start ADC measurements
 
+  digitalWrite(LED_BUILTIN, LOW);   // end of setup()
 }//end setup()
 
 ISR(ADC_vect)
@@ -70,6 +78,10 @@ ISR(ADC_vect)
 
 void loop()
 {
+  // put your main code here, to run repeatedly:
+  winkLED_BUILTIN(); //the built in LED.
+
+
   if (numSamples >= NUMBER_SAMPLES)
   {
     //Stop ADC interrupts
