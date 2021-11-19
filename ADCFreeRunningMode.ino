@@ -2,7 +2,7 @@
   from: http://yaab-arduino.blogspot.com/2015/02/fast-sampling-from-analog-input.html?m=1
 
 
-/*
+  /*
   Modified by Forrest Lee Erickson
   Date: 20211115 Remove magic numbers from code
   Read ADCL the lower bits.
@@ -13,8 +13,8 @@
   Warranty: This code is designed to kill you but not guaranteed to do so.
   20211118 Modularize by moving wink to files.
   20211118 Modularize by ADC setup to files.
-  20211119 Got wink working again. Got ADC working in module but timing is wrong.
-  
+  20211119 Got wink working again. Got ADC timing working.
+
 */
 
 #include "wink.h"
@@ -25,7 +25,7 @@ const long BAUD_RATE = 1000000; //Change to 1Mbit for speed.
 extern volatile int indexOfSample = 0; //Index for iterating ADC sample array.
 extern const int NUMBER_SAMPLES = 512;                 // Largest power of 2 we can allocate in the byte array next.
 extern volatile byte channel_1[NUMBER_SAMPLES][2] ;    // Hold the MSB and LSB of Channel 1 ADC conversion
- 
+
 
 void setup()
 {
@@ -35,8 +35,6 @@ void setup()
   setupWinkStart();
 
   setupFreerunningADCStart();  // Including 16 prescaler for 76.9 KHz
-
-  Serial.println("End of setup"); 
 
   //Wink off the LED_BUILTIN
   void setupWinkEnd(void);
@@ -55,6 +53,5 @@ void loop()
   winkLED_BUILTIN(); //the built in LED.
 
   printADCArray(); //Prints the ADC array if it is ready.
-
 
 }// end loop()

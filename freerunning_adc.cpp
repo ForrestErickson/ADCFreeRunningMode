@@ -31,55 +31,57 @@
 #include "Arduino.h"
 #include "freerunning_adc.h"
 
-long lastADCArraytime = 0;
-long nextSDCArray = 2000; //time in ms.
-
-//const int NUMBER_SAMPLES = 512;                 // Largest power of 2 we can allocate in the byte array next.
-//int NUMBER_SAMPLES ;                 // Largest power of 2 we can allocate in the byte array next.
-const int NUMBER_SAMPLES = 512;
-volatile byte channel_1[NUMBER_SAMPLES][2]; 
-//volatile byte channel_1[0][0]; 
-//volatile byte channel_1[][]; 
-
 extern volatile int indexOfSample ;
+
+long lastADCArraytime = 0;
+long nextADCArray = 2000; //time in ms.
+const int NUMBER_SAMPLES = 512;
+volatile byte channel_1[NUMBER_SAMPLES][2];
+
 long t, t0;                 //For measuring the time to aquire NUMBER_SAMPLES
 
-
-void printADCArray(void) {
-  //Get array if time to do so
-  if (((millis() - lastADCArraytime) > nextSDCArray) || (millis() < lastADCArraytime)) {
-    lastADCArraytime = millis();
-    if (indexOfSample >= NUMBER_SAMPLES)
-    {
-      //Stop ADC interrupts
-      ADCSRA &= ~(1 << ADIE);  // Disable interrupts when measurement complete
-      t = micros() - t0; // calculate elapsed time
-      indexOfSample = 0;
-
-      //    Serial.println("Sample#: value ");
-      for (int i = 1; i < NUMBER_SAMPLES; i++) {
-        //      Serial.print(i);                  //Print index
-        //      Serial.print(":, ");
-        //10 bit result = (ADCH << 8) |ADCL; // And then right shift to leave only 10 bits.
-        Serial.print((uint16_t(channel_1[i][0] << 8 | channel_1[i][1]) >> 6)); //Plot data.
-        Serial.println(", 1023, 0, 511");     //Red, Green Yellow, for MAX MIN and MID grid lines.
-      }
-      //Report setup and rate for plot, sort of, legend.
-      Serial.print("SampleInterval=");
-      Serial.print(t);
-      Serial.print("uS. ");
-      Serial.print("SampleNumber=");
-      Serial.print(NUMBER_SAMPLES);
-      Serial.print(" ");
-      Serial.print("SamplingFrequency=");
-      Serial.print((float)1000 * NUMBER_SAMPLES / t);
-      Serial.println("KSPS");
-      t0 = micros();  //Reset the t0 before another burst of conversions.
-      ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
-    }// end if (indexOfSample >= NUMBER_SAMPLES)
-  }//end printADCArray()
+//Prints min, mid and maximum axis and dac data sample by sample
+//Prints text following to make a legend.
+void printADCoutSerial(void) {
+  //    Serial.println("Sample#: value ");
+  for (int i = 1; i < NUMBER_SAMPLES; i++) {
+    //10 bit result = (ADCH << 8) |ADCL; // And then right shift to leave only 10 bits.
+    Serial.print((uint16_t(channel_1[i][0] << 8 | channel_1[i][1]) >> 6)); //Plot data.
+    Serial.println(", 1023, 0, 511");     //Red, Green Yellow, for MAX MIN and MID grid lines.
+  }
+  //Report setup and rate for plot, sort of, legend.
+  Serial.print("SampleInterval=");
+  Serial.print(t);
+  Serial.print("uS. ");
+  Serial.print("SampleNumber=");
+  Serial.print(NUMBER_SAMPLES);
+  Serial.print(" ");
+  Serial.print("SamplingFrequency=");
+  Serial.print((float)1000 * NUMBER_SAMPLES / t);
+  Serial.println("KSPS");
 }
 
+//Get and print an array full of data.
+void printADCArray(void) {
+  //Get array if time to do so
+  if (((millis() - lastADCArraytime) > nextADCArray) || (millis() < lastADCArraytime)) {
+    //Lets get an array full
+    indexOfSample = 0;
+    t0 = micros();  //Reset the t0 before another burst of conversions.
+    ADCSRA |= (1 << ADIE);  // enable interrupts to start capture
+
+    //Block whiel sample array fills.
+    while (indexOfSample < NUMBER_SAMPLES)
+    {
+      ;
+    }// end if (indexOfSample >= NUMBER_SAMPLES)
+
+    ADCSRA &= ~(1 << ADIE);       // Disable interrupts to stop capture
+    t = micros() - t0;            // calculate elapsed time
+    printADCoutSerial();
+    lastADCArraytime = millis();
+  }//end printADCArray()
+}
 
 
 
