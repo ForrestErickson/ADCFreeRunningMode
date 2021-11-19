@@ -47,8 +47,6 @@ void winkLED_BUILTIN(void) {
       nextLEDchange = LOW_TIME_LED;
     }
     lastLEDtime = millis();
-    Serial.print("Winking at: ");
-    Serial.println(millis());
   }//end LED wink
 
 

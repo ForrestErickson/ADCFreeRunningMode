@@ -13,6 +13,7 @@
   Warranty: This code is designed to kill you but not guaranteed to do so.
   20211118 Modularize by moving wink to files.
   20211118 Modularize by ADC setup to files.
+  20211119 Got wink working again. Got ADC working in module but timing is wrong.
   
 */
 
@@ -33,7 +34,7 @@ void setup()
   //Wink on the LED_BUILTIN
   setupWinkStart();
 
-//  setupFreerunningADCStart();  // Including 16 prescaler for 76.9 KHz
+  setupFreerunningADCStart();  // Including 16 prescaler for 76.9 KHz
 
   Serial.println("End of setup"); 
 
@@ -53,7 +54,7 @@ void loop()
   // put your main code here, to run repeatedly:
   winkLED_BUILTIN(); //the built in LED.
 
- // printADCArray(); //Prints the ADC array if it is ready.
+  printADCArray(); //Prints the ADC array if it is ready.
 
 
 }// end loop()

@@ -48,7 +48,6 @@ long t, t0;                 //For measuring the time to aquire NUMBER_SAMPLES
 void printADCArray(void) {
   //Get array if time to do so
   if (((millis() - lastADCArraytime) > nextSDCArray) || (millis() < lastADCArraytime)) {
-
     lastADCArraytime = millis();
     if (indexOfSample >= NUMBER_SAMPLES)
     {
@@ -75,13 +74,9 @@ void printADCArray(void) {
       Serial.print("SamplingFrequency=");
       Serial.print((float)1000 * NUMBER_SAMPLES / t);
       Serial.println("KSPS");
-      delay(2000); // so we can read the results.
-
       t0 = micros();  //Reset the t0 before another burst of conversions.
       ADCSRA |= (1 << ADIE);  // enable interrupts when measurement complete
     }// end if (indexOfSample >= NUMBER_SAMPLES)
-
-
   }//end printADCArray()
 }
 
